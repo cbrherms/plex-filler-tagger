@@ -49,7 +49,7 @@ This is the easiest way to manage the container.
       -e SONARR_URL="http://your_sonarr_server_url:8989" \
       -e API_KEY_SONARR="your_sonarr_api_key" \
       -v /path/to/your/config.yaml:/config/config.yaml \
-      ghcr.io/cbrherms/plex-filler-tagger:1.0.0
+      ghcr.io/cbrherms/plex-filler-tagger:1.1.0
     ```
     *Make sure to replace `/path/to/your/config.yaml` with the absolute path to your configuration file.*
 
