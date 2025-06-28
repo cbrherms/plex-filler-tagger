@@ -1,6 +1,6 @@
 services:
   plex-filler-tagger:
-    image: ghcr.io/cbrherms/plex-filler-tagger:latest
+    image: ghcr.io/cbrherms/plex-filler-tagger:1.0.0
     container_name: plex-filler-tagger
     restart: unless-stopped
     environment:
