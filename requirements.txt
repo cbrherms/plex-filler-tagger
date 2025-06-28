@@ -1,0 +1,6 @@
+requests
+pyyaml
+plexapi
+sonarr-py
+lxml
+python-dotenv

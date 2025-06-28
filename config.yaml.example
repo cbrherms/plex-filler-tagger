@@ -1,0 +1,11 @@
+plex_library_name: "Anime"
+
+plex_shows:
+  - plex_name: "Your Show Name"
+    sonarr_id: 123
+    animefillerlist_slug: "show-slug" # Slug from the end of the animefillerlist url, e.g. https://animefillerlist.com/show-slug
+
+# Add more shows as needed
+# - plex_name: "Another Show Name"
+#   sonarr_id: 456
+#   animefillerlist_slug: "another-show-slug"

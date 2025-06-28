@@ -1,0 +1,19 @@
+services:
+  plex-filler-tagger:
+    image: ghcr.io/cbrherms/plex-filler-tagger:latest
+    container_name: plex-filler-tagger
+    restart: unless-stopped
+    environment:
+      # --- Required ---
+      - PLEX_URL=http://your_plex_server_url:32400
+      - API_KEY_PLEX=your_plex_api_key
+      - SONARR_URL=http://your_sonarr_server_url:8989
+      - API_KEY_SONARR=your_sonarr_api_key
+      # --- Optional ---
+      - TZ=Etc/UTC # Set your timezone
+      # - CONFIG_PATH=/custom/path/config.yaml # Uncomment to override the default Docker path
+      # - DRY_RUN=true # Uncomment to prevent changes from being applied to Plex.
+      - DEBUG=false # Set to 'true' for verbose logging.
+    volumes:
+      # Mount your local config file
+      - /path/to/your/config/config.yaml:/config/config.yaml

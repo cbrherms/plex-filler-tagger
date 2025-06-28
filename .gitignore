@@ -1,0 +1,18 @@
+# User-specific configuration and credentials
+config.yaml
+.env
+
+# Python virtual environment
+.venv/
+venv/
+env/
+
+# Python cache and compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE/Editor specific files
+.vscode/
+.idea/
