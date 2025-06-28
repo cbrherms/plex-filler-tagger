@@ -11,7 +11,13 @@ def main():
 
     is_debug = os.getenv('DEBUG', 'false').lower() in ('true', '1', 't')
     log_level = logging.DEBUG if is_debug else logging.INFO
-    logging.basicConfig(level=log_level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', force=True)
+    
+    if is_debug:
+        log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    else:
+        log_format = '%(asctime)s - %(message)s'
+        
+    logging.basicConfig(level=log_level, format=log_format, force=True)
 
     if is_debug:
         logging.getLogger("urllib3").setLevel(logging.WARNING)
