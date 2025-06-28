@@ -58,31 +58,42 @@ class PlexClient:
 
         episode_map = {(ep.seasonNumber, ep.index): ep for ep in all_plex_episodes}
 
+        updated_count = 0
+        skipped_count = 0
+
         for (season_num, ep_num), status in episodes_to_tag.items():
             try:
                 episode = episode_map.get((season_num, ep_num))
                 
                 if not episode:
-                    logger.warning(f"Episode S{season_num}E{ep_num} for '{show_title}' not found in the pre-fetched list from Plex")
+                    logger.warning(f"Episode S{season_num:02d}E{ep_num:02d} for '{show_title}' not found in the pre-fetched list from Plex. Check your season order matches between Sonarr and Plex")
                     continue
                 
                 current_labels = [label.tag for label in episode.labels]
-                
+
                 if status in current_labels:
-                    logger.debug(f"Label '{status}' already present on S{season_num}E{ep_num}")
+                    logger.debug(f"Episode S{season_num:02d}E{ep_num:02d} already has tag '{status}'. Skipping")
+                    skipped_count += 1
                     continue
 
-                if dry_run:
-                    logger.info(f"[DRY RUN] Would add label '{status}' to '{show_title}' S{season_num}E{ep_num}")
-                    continue
+                tags_to_remove = [tag for tag in current_labels if tag in self.managed_tags]
+                
+                log_prefix = "[DRY RUN] " if dry_run else ""
+                
+                if tags_to_remove:
+                    logger.info(f"{log_prefix}Removing old tags {tags_to_remove} from S{season_num:02d}E{ep_num:02d} ('{episode.title}')")
+                    if not dry_run:
+                        episode.removeLabel(tags_to_remove, locked=False)
 
-                labels_to_remove = [label for label in current_labels if label in self.managed_tags]
-                if labels_to_remove:
-                    episode.removeLabel(labels_to_remove, locked=False)
-                    logger.debug(f"Removed old status labels {labels_to_remove} from S{season_num}E{ep_num}")
-
-                episode.addLabel([status], locked=False)
-                logger.info(f"Labeled '{show_title}' S{season_num}E{ep_num} with '{status}'")
+                logger.info(f"{log_prefix}Adding tag '{status}' to S{season_num:02d}E{ep_num:02d} ('{episode.title}')")
+                if not dry_run:
+                    episode.addLabel(status, locked=False)
+                
+                updated_count += 1
 
             except Exception as e:
-                logger.error(f"Failed to update labels for S{season_num}E{ep_num}: {e}")
+                logger.error(f"Failed to update tags for S{season_num:02d}E{ep_num:02d} of '{show_title}': {e}")
+        
+        logger.info(f"Processing complete for '{show_title}'")
+        logger.info(f"  Episodes updated: {updated_count}")
+        logger.info(f"  Episodes skipped (already tagged): {skipped_count}")
