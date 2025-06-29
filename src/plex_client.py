@@ -1,8 +1,13 @@
 import logging
+import requests
 from plexapi.server import PlexServer
 from plexapi.exceptions import NotFound
+from plexapi import const
 
 logger = logging.getLogger(__name__)
+
+CLIENT_IDENTIFIER = "cbrherms-plex-filler-tagger"
+DEVICE_NAME = "Plex Filler Tagger"
 
 class PlexClient:
     """A client for interacting with the Plex Media Server API"""
@@ -24,7 +29,15 @@ class PlexClient:
     def connect(self):
         """Establishes and tests the connection to the Plex server"""
         try:
-            self._server = PlexServer(self.base_url, self.token)
+            session = requests.Session()
+            
+            headers = const.X_PLEX_HEADERS.copy()
+            headers['X-Plex-Client-Identifier'] = CLIENT_IDENTIFIER
+            headers['X-Plex-Device-Name'] = DEVICE_NAME
+            
+            session.headers.update(headers)
+
+            self._server = PlexServer(self.base_url, self.token, session=session)
             self._server.version
             logger.info(f"Successfully connected to Plex server: {self._server.friendlyName}")
         except Exception as e:
