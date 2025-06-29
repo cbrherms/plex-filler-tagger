@@ -38,7 +38,7 @@ def get_episode_status(url: str) -> dict[str, list[int]]:
         xpaths = {
             "MangaCanon": '//div[contains(@class, "manga_canon")]//span[@class="Episodes"]/a/text()',
             "Mixed": '//div[contains(@class, "mixed_canon/filler")]//span[@class="Episodes"]/a/text()',
-            "Filler": '//div[contains(@class, "filler")]//span[@class="Episodes"]/a/text()',
+            "Filler": '//div[contains(@class, "filler") and not(contains(@class, "mixed_canon/filler"))]//span[@class="Episodes"]/a/text()',
             "AnimeCanon": '//div[contains(@class, "anime_canon")]//span[@class="Episodes"]/a/text()',
         }
 
