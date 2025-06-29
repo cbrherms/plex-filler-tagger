@@ -55,10 +55,23 @@ class PlexClient:
             return
 
         try:
-            show = self._server.library.section(library_name).get(show_title)
-            logger.info(f"Found show '{show_title}' in Plex library '{library_name}'")
+            results = self._server.library.section(library_name).search(title=show_title, libtype='show')
+            
+            if not results:
+                logger.error(f"Show '{show_title}' not found in Plex library '{library_name}'")
+                return
+
+            show = next((s for s in results if s.title.lower() == show_title.lower()), None)
+            
+            if not show:
+                possible_matches = [s.title for s in results]
+                logger.error(f"Could not find an exact match for '{show_title}' in Plex library '{library_name}'.")
+                logger.warning(f"Possible fuzzy matches were: {possible_matches}. Please check the 'plex_name' in your config.")
+                return
+
+            logger.info(f"Found exact match for show '{show.title}' in Plex library '{library_name}'")
         except NotFound:
-            logger.error(f"Show '{show_title}' not found in Plex library '{library_name}'")
+            logger.error(f"Library '{library_name}' not found on the Plex server.")
             return
 
         logger.info(f"Fetching all episodes for '{show_title}' from Plex. This may take a moment...")
