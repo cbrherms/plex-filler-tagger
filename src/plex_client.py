@@ -31,6 +31,15 @@ class PlexClient:
             logger.error(f"Failed to connect to Plex at {self.base_url}: {e}")
             raise
 
+    def disconnect(self):
+        """Closes the connection to the Plex server"""
+        if self._server and self._server._session:
+            try:
+                self._server._session.close()
+                logger.info("Successfully disconnected from Plex")
+            except Exception as e:
+                logger.error(f"Failed to disconnect from Plex: {e}")
+
     def update_tags(self, show_title: str, episodes_to_tag: dict, library_name: str, dry_run: bool = False):
         """
         Updates labels for episodes of a specific show in Plex

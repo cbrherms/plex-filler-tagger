@@ -53,49 +53,56 @@ def main():
         api_key=os.getenv('API_KEY_SONARR')
     )
 
-    plex_client.connect()
-    sonarr_client.connect()
+    try:
+        plex_client.connect()
+        sonarr_client.connect()
 
-    for show in config.shows:
-        plex_name = show['plex_name']
-        sonarr_id = show['sonarr_id']
-        anime_filler_list_slug = show['animefillerlist_slug']
-        
-        logging.info(f"Processing show: {plex_name}")
+        for show in config.shows:
+            plex_name = show['plex_name']
+            sonarr_id = show['sonarr_id']
+            anime_filler_list_slug = show['animefillerlist_slug']
+            
+            logging.info(f"Processing show: {plex_name}")
 
-        anime_filler_list_url = f"https://www.animefillerlist.com/shows/{anime_filler_list_slug}"
+            anime_filler_list_url = f"https://www.animefillerlist.com/shows/{anime_filler_list_slug}"
 
-        all_episode_statuses = get_episode_status(anime_filler_list_url)
-        if not all_episode_statuses:
-            logging.warning(f"No episode statuses found for {plex_name}, skipping")
-            continue
-        
-        episode_to_status_map = {}
-        for status, episodes in all_episode_statuses.items():
-            for episode_number in episodes:
-                episode_to_status_map[episode_number] = status
-        
-        logging.info(f"Found {len(episode_to_status_map)} statuses for {plex_name} from AnimeFillerList")
+            all_episode_statuses = get_episode_status(anime_filler_list_url)
+            if not all_episode_statuses:
+                logging.warning(f"No episode statuses found for {plex_name}, skipping")
+                continue
+            
+            episode_to_status_map = {}
+            for status, episodes in all_episode_statuses.items():
+                for episode_number in episodes:
+                    episode_to_status_map[episode_number] = status
+            
+            logging.info(f"Found {len(episode_to_status_map)} statuses for {plex_name} from AnimeFillerList")
 
-        sonarr_episodes = sonarr_client.get_show_episodes(sonarr_id)
-        if not sonarr_episodes:
-            logging.warning(f"No episodes found in Sonarr for {plex_name} (ID: {sonarr_id}), skipping")
-            continue
+            sonarr_episodes = sonarr_client.get_show_episodes(sonarr_id)
+            if not sonarr_episodes:
+                logging.warning(f"No episodes found in Sonarr for {plex_name} (ID: {sonarr_id}), skipping")
+                continue
 
-        episodes_to_tag = {}
-        for ep in sonarr_episodes:
-            abs_ep_num = getattr(ep, 'absolute_episode_number', None)
-            logging.debug(f"Processing Sonarr episode: abs_ep_num={abs_ep_num}, title={getattr(ep, 'title', 'N/A')}")
-            if abs_ep_num and abs_ep_num in episode_to_status_map:
-                status = episode_to_status_map[abs_ep_num]
-                season_num = getattr(ep, 'season_number', None)
-                ep_num = getattr(ep, 'episode_number', None)
-                if season_num is not None and ep_num is not None:
-                    episodes_to_tag[(season_num, ep_num)] = status
-        
-        logging.info(f"Prepared {len(episodes_to_tag)} tags for '{plex_name}'")
+            episodes_to_tag = {}
+            for ep in sonarr_episodes:
+                abs_ep_num = getattr(ep, 'absolute_episode_number', None)
+                logging.debug(f"Processing Sonarr episode: abs_ep_num={abs_ep_num}, title={getattr(ep, 'title', 'N/A')}")
+                if abs_ep_num and abs_ep_num in episode_to_status_map:
+                    status = episode_to_status_map[abs_ep_num]
+                    season_num = getattr(ep, 'season_number', None)
+                    ep_num = getattr(ep, 'episode_number', None)
+                    if season_num is not None and ep_num is not None:
+                        episodes_to_tag[(season_num, ep_num)] = status
+            
+            logging.info(f"Prepared {len(episodes_to_tag)} tags for '{plex_name}'")
 
-        plex_client.update_tags(plex_name, episodes_to_tag, config.plex_library_name, dry_run=dry_run)
+            plex_client.update_tags(plex_name, episodes_to_tag, config.plex_library_name, dry_run=dry_run)
+
+    finally:
+        plex_client.disconnect()
+        sonarr_client.disconnect()
+        logging.info("Script finished.")
+
 
 if __name__ == '__main__':
     main()
