@@ -23,6 +23,10 @@ def main():
         logging.getLogger("urllib3").setLevel(logging.WARNING)
         logging.getLogger("plexapi").setLevel(logging.INFO)
 
+    print("=" * 120)
+    logging.info("--- Plex Filler Tagger Initializing ---")
+    print("=" * 120)
+
     config_path_env = os.getenv('CONFIG_PATH')
     if config_path_env:
         config_path = config_path_env
@@ -58,6 +62,8 @@ def main():
         sonarr_client.connect()
 
         for show in config.shows:
+            print()
+            print("-" * 60)
             plex_name = show['plex_name']
             sonarr_id = show['sonarr_id']
             anime_filler_list_slug = show['animefillerlist_slug']
@@ -109,9 +115,15 @@ def main():
             logging.info(f"Prepared {len(episodes_to_tag)} tags for '{plex_name}'")
 
             plex_client.update_tags(plex_name, episodes_to_tag, config.plex_library_name, ep_key_to_abs_num, dry_run=dry_run)
+            print("-" * 60)
 
     finally:
+        print()
         plex_client.disconnect()
+        print()
+        print("=" * 120)
+        logging.info("--- Script Finished ---")
+        print("=" * 120)
 
 
 if __name__ == '__main__':
