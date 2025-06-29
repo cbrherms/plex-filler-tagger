@@ -63,7 +63,7 @@ def main():
 
         for show in config.shows:
             print()
-            print("-" * 60)
+            print("-" * 120)
             plex_name = show['plex_name']
             sonarr_id = show['sonarr_id']
             anime_filler_list_slug = show['animefillerlist_slug']
@@ -115,7 +115,7 @@ def main():
             logging.info(f"Prepared {len(episodes_to_tag)} tags for '{plex_name}'")
 
             plex_client.update_tags(plex_name, episodes_to_tag, config.plex_library_name, ep_key_to_abs_num, dry_run=dry_run)
-            print("-" * 60)
+            print("-" * 120)
 
     finally:
         print()
