@@ -101,21 +101,20 @@ class PlexClient:
                     continue
                 
                 current_labels = [label.tag for label in episode.labels]
+                existing_managed_tags = [tag for tag in current_labels if tag in self.managed_tags]
 
-                if status in current_labels:
-                    logger.debug(f"Episode S{season_num:02d}E{ep_num:02d} already has tag '{status}'. Skipping")
+                if status in existing_managed_tags and len(existing_managed_tags) == 1:
+                    logger.debug(f"Episode S{season_num:02d}E{ep_num:02d} already has correct tag '{status}'. Skipping")
                     skipped_count += 1
                     continue
 
-                tags_to_remove = [tag for tag in current_labels if tag in self.managed_tags]
-                
                 log_prefix = "[DRY RUN] " if dry_run else ""
                 abs_num_str = f"(Absolute Ep: {ep_key_to_abs_num.get((season_num, ep_num), 'N/A')})"
                 
-                if tags_to_remove:
-                    logger.info(f"{log_prefix}Removing old tags {tags_to_remove} from S{season_num:02d}E{ep_num:02d} {abs_num_str} ('{episode.title}')")
+                if existing_managed_tags:
+                    logger.info(f"{log_prefix}Removing old/incorrect tags {existing_managed_tags} from S{season_num:02d}E{ep_num:02d} {abs_num_str} ('{episode.title}')")
                     if not dry_run:
-                        episode.removeLabel(tags_to_remove, locked=False)
+                        episode.removeLabel(existing_managed_tags, locked=False)
 
                 logger.info(f"{log_prefix}Adding tag '{status}' to S{season_num:02d}E{ep_num:02d} {abs_num_str} ('{episode.title}')")
                 if not dry_run:
