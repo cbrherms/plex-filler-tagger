@@ -71,6 +71,15 @@ def main():
                 logging.warning(f"No episode statuses found for {plex_name}, skipping")
                 continue
             
+            # Log a summary of the parsed data
+            logging.info("Parsed episode counts from AnimeFillerList:")
+            total_parsed_eps = 0
+            for status, episodes in all_episode_statuses.items():
+                count = len(episodes)
+                logging.info(f"  {status}: {count}")
+                total_parsed_eps += count
+            logging.info(f"  Total Parsed: {total_parsed_eps}")
+
             episode_to_status_map = {}
             for status, episodes in all_episode_statuses.items():
                 for episode_number in episodes:
@@ -84,6 +93,7 @@ def main():
                 continue
 
             episodes_to_tag = {}
+            ep_key_to_abs_num = {}
             for ep in sonarr_episodes:
                 abs_ep_num = getattr(ep, 'absolute_episode_number', None)
                 logging.debug(f"Processing Sonarr episode: abs_ep_num={abs_ep_num}, title={getattr(ep, 'title', 'N/A')}")
@@ -92,15 +102,16 @@ def main():
                     season_num = getattr(ep, 'season_number', None)
                     ep_num = getattr(ep, 'episode_number', None)
                     if season_num is not None and ep_num is not None:
-                        episodes_to_tag[(season_num, ep_num)] = status
+                        ep_key = (season_num, ep_num)
+                        episodes_to_tag[ep_key] = status
+                        ep_key_to_abs_num[ep_key] = abs_ep_num
             
             logging.info(f"Prepared {len(episodes_to_tag)} tags for '{plex_name}'")
 
-            plex_client.update_tags(plex_name, episodes_to_tag, config.plex_library_name, dry_run=dry_run)
+            plex_client.update_tags(plex_name, episodes_to_tag, config.plex_library_name, ep_key_to_abs_num, dry_run=dry_run)
 
     finally:
         plex_client.disconnect()
-        logging.info("Script finished.")
 
 
 if __name__ == '__main__':

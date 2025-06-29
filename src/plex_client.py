@@ -46,7 +46,7 @@ class PlexClient:
             except Exception as e:
                 logger.error(f"Failed to disconnect from Plex: {e}")
 
-    def update_tags(self, show_title: str, episodes_to_tag: dict, library_name: str, dry_run: bool = False):
+    def update_tags(self, show_title: str, episodes_to_tag: dict, library_name: str, ep_key_to_abs_num: dict, dry_run: bool = False):
         """
         Updates labels for episodes of a specific show in Plex
 
@@ -54,6 +54,7 @@ class PlexClient:
             show_title: The title of the show to update
             episodes_to_tag: A dictionary mapping (season, episode) to a status tag
             library_name: The name of the Plex library to search in
+            ep_key_to_abs_num: A dictionary mapping (season, episode) to an absolute episode number
             dry_run: If True, only log the changes that would be made
         """
         if not self._server:
@@ -86,7 +87,7 @@ class PlexClient:
 
         episode_map = {(ep.seasonNumber, ep.index): ep for ep in all_plex_episodes}
 
-        updated_count = 0
+        tag_counts = {tag: 0 for tag in self.managed_tags}
         skipped_count = 0
 
         for (season_num, ep_num), status in episodes_to_tag.items():
@@ -107,21 +108,29 @@ class PlexClient:
                 tags_to_remove = [tag for tag in current_labels if tag in self.managed_tags]
                 
                 log_prefix = "[DRY RUN] " if dry_run else ""
+                abs_num_str = f"(Absolute Ep: {ep_key_to_abs_num.get((season_num, ep_num), 'N/A')})"
                 
                 if tags_to_remove:
-                    logger.info(f"{log_prefix}Removing old tags {tags_to_remove} from S{season_num:02d}E{ep_num:02d} ('{episode.title}')")
+                    logger.info(f"{log_prefix}Removing old tags {tags_to_remove} from S{season_num:02d}E{ep_num:02d} {abs_num_str} ('{episode.title}')")
                     if not dry_run:
                         episode.removeLabel(tags_to_remove, locked=False)
 
-                logger.info(f"{log_prefix}Adding tag '{status}' to S{season_num:02d}E{ep_num:02d} ('{episode.title}')")
+                logger.info(f"{log_prefix}Adding tag '{status}' to S{season_num:02d}E{ep_num:02d} {abs_num_str} ('{episode.title}')")
                 if not dry_run:
                     episode.addLabel(status, locked=False)
                 
-                updated_count += 1
+                if status in tag_counts:
+                    tag_counts[status] += 1
 
             except Exception as e:
                 logger.error(f"Failed to update tags for S{season_num:02d}E{ep_num:02d} of '{show_title}': {e}")
         
+        total_updated = sum(tag_counts.values())
         logger.info(f"Processing complete for '{show_title}'")
-        logger.info(f"  Episodes updated: {updated_count}")
+        logger.info(f"  Episodes updated: {total_updated}")
         logger.info(f"  Episodes skipped (already tagged): {skipped_count}")
+        if total_updated > 0:
+            logger.info("  Tag summary for updated episodes:")
+            for tag, count in tag_counts.items():
+                if count > 0:
+                    logger.info(f"    {tag}: {count}")
