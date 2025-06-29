@@ -100,7 +100,6 @@ def main():
 
     finally:
         plex_client.disconnect()
-        sonarr_client.disconnect()
         logging.info("Script finished.")
 
 
