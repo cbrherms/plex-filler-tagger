@@ -5,9 +5,11 @@ from plexapi.exceptions import NotFound
 
 logger = logging.getLogger(__name__)
 
-plexapi.X_PLEX_CLIENT_IDENTIFIER = "cbrherms-plex-filler-tagger"
-plexapi.X_PLEX_DEVICE_NAME = "Plex Filler Tagger"
-plexapi.X_PLEX_PRODUCT = "Plex Filler Tagger"
+plexapi.BASE_HEADERS.update({
+    "X-Plex-Product": "Plex Filler Tagger",
+    "X-Plex-Device-Name": "Plex Filler Tagger",
+    "X-Plex-Client-Identifier": "cbrherms-plex-filler-tagger"
+})
 
 
 class PlexClient:
