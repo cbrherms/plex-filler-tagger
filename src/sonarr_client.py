@@ -30,15 +30,6 @@ class SonarrClient:
             logger.error(f"Failed to connect to Sonarr at {self.base_url}: {e}")
             raise
 
-    def disconnect(self):
-        """Closes the connection to the Sonarr API"""
-        if self._api_client:
-            try:
-                self._api_client.close()
-                logger.info("Successfully disconnected from Sonarr")
-            except Exception as e:
-                logger.error(f"Failed to disconnect from Sonarr: {e}")
-
     def get_show_episodes(self, series_id: int) -> list:
         """
         Retrieves all episodes for a given Sonarr series ID

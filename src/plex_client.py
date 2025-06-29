@@ -1,8 +1,14 @@
 import logging
+import plexapi
 from plexapi.server import PlexServer
 from plexapi.exceptions import NotFound
 
 logger = logging.getLogger(__name__)
+
+plexapi.X_PLEX_CLIENT_IDENTIFIER = "cbrherms-plex-filler-tagger"
+plexapi.X_PLEX_DEVICE_NAME = "Plex Filler Tagger"
+plexapi.X_PLEX_PRODUCT = "Plex Filler Tagger"
+
 
 class PlexClient:
     """A client for interacting with the Plex Media Server API"""
