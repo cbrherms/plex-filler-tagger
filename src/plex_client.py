@@ -111,12 +111,15 @@ class PlexClient:
                 log_prefix = "[DRY RUN] " if dry_run else ""
                 abs_num_str = f"(Absolute Ep: {ep_key_to_abs_num.get((season_num, ep_num), 'N/A')})"
                 
+                logger.info(f"{log_prefix}Updating tags for S{season_num:02d}E{ep_num:02d} {abs_num_str} ('{episode.title}')")
+
                 if existing_managed_tags:
-                    logger.info(f"{log_prefix}Removing old/incorrect tags {existing_managed_tags} from S{season_num:02d}E{ep_num:02d} {abs_num_str} ('{episode.title}')")
+                    logger.info(f"  - Removing: {existing_managed_tags}")
                     if not dry_run:
                         episode.removeLabel(existing_managed_tags, locked=False)
-
-                logger.info(f"{log_prefix}Adding tag '{status}' to S{season_num:02d}E{ep_num:02d} {abs_num_str} ('{episode.title}')")
+                        episode.reload()
+                
+                logger.info(f"  - Adding: '{status}'")
                 if not dry_run:
                     episode.addLabel(status, locked=False)
                 
