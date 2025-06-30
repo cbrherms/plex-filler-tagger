@@ -27,7 +27,7 @@ class PlexClient:
         self.token = token
         self._server = None
         # These are the tags we manage. Any other tags on the episode will be left alone.
-        self.managed_tags = ["MangaCanon", "Mixed", "Filler", "AnimeCanon"]
+        self.managed_tags = {"MangaCanon", "Mixed", "Filler", "AnimeCanon"}
 
     def connect(self):
         """Establishes and tests the connection to the Plex server"""
