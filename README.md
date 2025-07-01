@@ -1,4 +1,15 @@
 # Plex Filler Tagger
+<div align="center">
+
+---
+
+### Docker container available:
+
+[![ghcr.io](https://img.shields.io/badge/ghcr.io-cbrherms/plex--filler--tagger-blue?logo=github)](https://ghcr.io/cbrherms/plex-filler-tagger)
+
+---
+
+</div>
 
 ## Overview
 The `plex-filler-tagger` is a Python application designed to manage episode tags in Plex based on their status from AnimeFillerList.com. It fetches episode statuses (Manga Canon, Filler, etc.), correlates them with your library via Sonarr, and applies them as tags in Plex. This facilitates the creation of smart collections and overlays in tools like Kometa.
