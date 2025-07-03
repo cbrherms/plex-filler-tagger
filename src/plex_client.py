@@ -2,6 +2,8 @@ import logging
 import plexapi
 from plexapi.server import PlexServer
 from plexapi.exceptions import NotFound
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +49,19 @@ class PlexClient:
                 logger.info("Successfully disconnected from Plex")
             except Exception as e:
                 logger.error(f"Failed to disconnect from Plex: {e}")
+    
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(5), retry=retry_if_exception_type(requests.exceptions.RequestException))
+    def fetch_episodes(self, show):
+        return show.episodes()
+
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(2), retry=retry_if_exception_type(requests.exceptions.RequestException))
+    def remove_labels(self, episode, labels):
+        episode.removeLabel(labels, locked=False)
+        episode.reload()
+
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(2), retry=retry_if_exception_type(requests.exceptions.RequestException))
+    def add_label(self, episode, label):
+        episode.addLabel(label, locked=False)
 
     def update_tags(self, show_title: str, episodes_to_tag: dict, library_name: str, ep_key_to_abs_num: dict, dry_run: bool = False, reapply_tags: bool = False):
         """
@@ -85,7 +100,7 @@ class PlexClient:
             return
 
         logger.info(f"Fetching all episodes for '{show_title}' from Plex. This may take a moment...")
-        all_plex_episodes = show.episodes()
+        all_plex_episodes = self.fetch_episodes(show)
         logger.info(f"Found {len(all_plex_episodes)} episodes in Plex for '{show_title}'")
 
         episode_map = {(ep.seasonNumber, ep.index): ep for ep in all_plex_episodes}
@@ -117,12 +132,11 @@ class PlexClient:
                 if existing_managed_tags:
                     logger.info(f"  - Removing: {existing_managed_tags}")
                     if not dry_run:
-                        episode.removeLabel(existing_managed_tags, locked=False)
-                        episode.reload()
+                        self.remove_labels(episode, existing_managed_tags)
                 
                 logger.info(f"  - Adding: '{status}'")
                 if not dry_run:
-                    episode.addLabel(status, locked=False)
+                    self.add_label(episode, status)
                 
                 if status in tag_counts:
                     tag_counts[status] += 1
