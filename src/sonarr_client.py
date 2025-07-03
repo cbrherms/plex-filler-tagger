@@ -1,5 +1,7 @@
 import logging
 import sonarr
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +32,7 @@ class SonarrClient:
             logger.error(f"Failed to connect to Sonarr at {self.base_url}: {e}")
             raise
 
+    @retry(stop=stop_after_attempt(3), wait=wait_fixed(2), retry=retry_if_exception_type(requests.exceptions.RequestException))
     def get_show_episodes(self, series_id: int) -> list:
         """
         Retrieves all episodes for a given Sonarr series ID
