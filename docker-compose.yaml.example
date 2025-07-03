@@ -11,6 +11,7 @@ services:
       - API_KEY_SONARR=your_sonarr_api_key
       # --- Optional ---
       - TZ=Etc/UTC # Set your timezone
+      - REAPPLY_TAGS=false # Set to 'true' to reapply tags even if they are already correct
       # - CONFIG_PATH=/custom/path/config.yaml # Uncomment to override the default Docker path
       # - DRY_RUN=true # Uncomment to prevent changes from being applied to Plex.
       - DEBUG=false # Set to 'true' for verbose logging.

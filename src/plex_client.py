@@ -48,7 +48,7 @@ class PlexClient:
             except Exception as e:
                 logger.error(f"Failed to disconnect from Plex: {e}")
 
-    def update_tags(self, show_title: str, episodes_to_tag: dict, library_name: str, ep_key_to_abs_num: dict, dry_run: bool = False):
+    def update_tags(self, show_title: str, episodes_to_tag: dict, library_name: str, ep_key_to_abs_num: dict, dry_run: bool = False, reapply_tags: bool = False):
         """
         Updates labels for episodes of a specific show in Plex
 
@@ -58,6 +58,7 @@ class PlexClient:
             library_name: The name of the Plex library to search in
             ep_key_to_abs_num: A dictionary mapping (season, episode) to an absolute episode number
             dry_run: If True, only log the changes that would be made
+            reapply_tags: If True, always remove and reapply tags even if the correct tag is present
         """
         if not self._server:
             logger.error("Not connected to Plex. Call connect() first")
@@ -103,7 +104,7 @@ class PlexClient:
                 current_labels = [label.tag for label in episode.labels]
                 existing_managed_tags = [tag for tag in current_labels if tag in self.managed_tags]
 
-                if status in existing_managed_tags and len(existing_managed_tags) == 1:
+                if not reapply_tags and status in existing_managed_tags and len(existing_managed_tags) == 1:
                     logger.debug(f"Episode S{season_num:02d}E{ep_num:02d} already has correct tag '{status}'. Skipping")
                     skipped_count += 1
                     continue
