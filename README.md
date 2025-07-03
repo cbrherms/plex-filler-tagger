@@ -134,6 +134,7 @@ These are used to configure the application, especially for Docker. For manual i
 | `SONARR_URL` | Your Sonarr instance URL | (none) |
 | `API_KEY_SONARR` | Your Sonarr API key | (none) |
 | `CONFIG_PATH` | Manually override the default config file location | (none) |
+| `REAPPLY_TAGS` | Set to `true` to reapply all tags even if they are already correct | `false` |
 | `DRY_RUN` | Set to `true` to prevent changes to Plex | `false` |
 | `DEBUG` | Set to `true` to enable verbose debug logging | `false` |
 | `TZ` | Set the timezone for logging | `Etc/UTC` |

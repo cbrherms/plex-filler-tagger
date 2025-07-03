@@ -4,3 +4,4 @@ plexapi
 sonarr-py
 lxml
 python-dotenv
+tenacity
